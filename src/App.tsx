@@ -1,4 +1,4 @@
-import {useReducer, useState} from "react";
+import {useEffect, useReducer, useState} from "react";
 import "./App.css";
 
 function reducer({state}) {
@@ -36,18 +36,46 @@ const Button = props => {
     );
 };
 
-function App() {
-    const [busy, setBusy] = useState(false);
-    const props = {
-        increment: 2,
-        underline: true
-    };
+// *
+// * idle
+// * loading
+// * loaded
+// * error
+// *
 
+function App() {
+    const [state, setState] = useState("idle");
+
+    function handleClick() {
+        setState("loading");
+        fetch("/data.json")
+            .then(data => {
+                try {
+                    // JSON.parse(data);
+                    setState("loaded");
+                } catch (error) {
+                    setState("json-error");
+                }
+            })
+            .catch(err => {
+                setState("network-error");
+            });
+    }
+
+    if (state === "loading") {
+        return <div>Loading...</div>;
+    }
+
+    if (state === "network-error") {
+        return <div>Error fething your request</div>;
+    }
+
+    if (state === "json-error") {
+        return <div>Bad server response</div>;
+    }
     return (
-        <div className="App">
-            <Button {...props} color="black" />
-            <Button {...props} color="blue" />
-            <Button {...props} underline={false} color="green" />
+        <div className="App" onClick={handleClick}>
+            Текущий стейт: {state}
         </div>
     );
 }
