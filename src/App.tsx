@@ -1,82 +1,41 @@
-import {useEffect, useReducer, useState} from "react";
+import React, {useState} from "react";
 import "./App.css";
 
-function reducer({state}) {
-    switch (state) {
-        case "PRESSED_ONCE":
-            return {
-                state: "PRESSED_TWO"
-            };
-        case "PRESSED_TWO":
-            return {
-                state: "PRESSED_THREE"
-            };
-        case "PRESSED_THREE":
-            return {
-                state: "PRESSED_ONCE"
-            };
+const Checkbox = ({children}) => {
+    const [checked, setChecked] = useState(true);
+    console.log(checked);
 
-        default:
-            break;
-    }
-}
-
-const Button = props => {
-    const [counter, setCounter] = useState(0);
-
-    const [state, dispatch] = useReducer(reducer, {
-        state: "PRESSED_ONCE"
+    const allChildren = React.Children.map(children, child => {
+        const clone = React.cloneElement(child, {
+            checked,
+            setChecked
+        });
+        return clone;
     });
 
+    return allChildren;
+};
+const CheckboxInput = ({checked, setChecked}) => {
     return (
-        <div style={{color: props.color, textDecoration: props.underline ? "underline" : undefined}}>
-            <div onClick={() => dispatch()}>sdfdsfsd</div>
-            <div>{state.state}</div>
-        </div>
+        <input
+            type="checkbox"
+            checked={checked}
+            onChange={e => {
+                setChecked(e.target.checked);
+            }}
+        />
     );
 };
-
-// *
-// * idle
-// * loading
-// * loaded
-// * error
-// *
+const Label = ({setChecked, children}) => {
+    return <label onClick={() => setChecked(prevState => !prevState)}>{children}</label>;
+};
 
 function App() {
-    const [state, setState] = useState("idle");
-
-    function handleClick() {
-        setState("loading");
-        fetch("/data.json")
-            .then(data => {
-                try {
-                    // JSON.parse(data);
-                    setState("loaded");
-                } catch (error) {
-                    setState("json-error");
-                }
-            })
-            .catch(err => {
-                setState("network-error");
-            });
-    }
-
-    if (state === "loading") {
-        return <div>Loading...</div>;
-    }
-
-    if (state === "network-error") {
-        return <div>Error fething your request</div>;
-    }
-
-    if (state === "json-error") {
-        return <div>Bad server response</div>;
-    }
     return (
-        <div className="App" onClick={handleClick}>
-            Текущий стейт: {state}
-        </div>
+        <Checkbox>
+            <CheckboxInput />
+            <Label>Chek box label</Label>
+        </Checkbox>
     );
 }
 
